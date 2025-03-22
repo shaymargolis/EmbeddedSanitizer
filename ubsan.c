@@ -6,16 +6,27 @@
  * Author: Andrey Ryabinin <ryabinin.a.a@gmail.com>
  */
 
-#include <linux/bitops.h>
-#include <linux/bug.h>
-#include <linux/ctype.h>
-#include <linux/init.h>
-#include <linux/kernel.h>
-#include <linux/types.h>
-#include <linux/sched.h>
-#include <linux/uaccess.h>
-#include <linux/ubsan.h>
-#include <kunit/test-bug.h>
+// New includes
+
+#include "helper.h"
+#include <stdint.h>
+#include <linux/align.h>
+#include <linux/ffs.h>
+#include <linux/atomic-gcc.h>
+
+
+// Prev includes
+
+// #include <bitops.h>
+// #include <bug.h>
+// #include <ctype.h>
+// #include <init.h>
+// #include <kernel.h>
+// #include <types.h>
+// #include <sched.h>
+// #include <uaccess.h>
+// #include <ubsan.h>
+// #include <kunit/test-bug.h>
 
 #include "ubsan.h"
 
@@ -128,7 +139,7 @@ static bool was_reported(struct source_location *location)
 
 static bool suppress_report(struct source_location *loc)
 {
-    return current->in_ubsan || was_reported(loc);
+    return was_reported(loc);
 }
 
 static bool type_is_int(struct type_descriptor *type)
@@ -196,7 +207,7 @@ static void val_to_string(char *str, size_t size, struct type_descriptor *type,
 #if defined(CONFIG_ARCH_SUPPORTS_INT128)
             u_max val = get_unsigned_val(type, value);
 
-            scnprintf(str, size, "0x%08x%08x%08x%08x",
+            snprintf(str, size, "0x%08x%08x%08x%08x",
                 (u32)(val >> 96),
                 (u32)(val >> 64),
                 (u32)(val >> 32),
@@ -205,10 +216,10 @@ static void val_to_string(char *str, size_t size, struct type_descriptor *type,
             WARN_ON(1);
 #endif
         } else if (type_is_signed(type)) {
-            scnprintf(str, size, "%lld",
+            snprintf(str, size, "%lld",
                 (s64)get_signed_val(type, value));
         } else {
-            scnprintf(str, size, "%llu",
+            snprintf(str, size, "%llu",
                 (u64)get_unsigned_val(type, value));
         }
     }
@@ -216,8 +227,6 @@ static void val_to_string(char *str, size_t size, struct type_descriptor *type,
 
 static void ubsan_prologue(struct source_location *loc, const char *reason)
 {
-    current->in_ubsan++;
-
     pr_warn(CUT_HERE);
 
     pr_err("UBSAN: %s in %s:%d:%d\n", reason, loc->file_name,
@@ -230,8 +239,6 @@ static void ubsan_epilogue(void)
 {
     dump_stack();
     pr_warn("---[ end trace ]---\n");
-
-    current->in_ubsan--;
 
     check_panic_on_warn("UBSAN");
 }
