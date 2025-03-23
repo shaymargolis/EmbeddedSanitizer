@@ -16,18 +16,21 @@
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 #define DISABLE_BRANCH_PROFILING
 
-#include <linux/export.h>
-#include <linux/init.h>
-#include <linux/kernel.h>
-#include <linux/memblock.h>
-#include <linux/mm.h>
-#include <linux/printk.h>
-#include <linux/sched.h>
-#include <linux/slab.h>
-#include <linux/stacktrace.h>
-#include <linux/string.h>
-#include <linux/types.h>
+// #include <linux/export.h>
+// #include <linux/init.h>
+// #include <linux/kernel.h>
+// #include <linux/memblock.h>
+// #include <linux/mm.h>
+// #include <linux/printk.h>
+// #include <linux/sched.h>
+// #include <linux/slab.h>
+// #include <linux/stacktrace.h>
+// #include <linux/string.h>
+// #include <linux/types.h>
+#include "../helper.h"
 #include <linux/kasan.h>
+#include <linux/compiler.h>
+#include <string.h>
 
 #include "kasan.h"
 
@@ -35,7 +38,7 @@
  * Poisons the shadow memory for 'size' bytes starting from 'addr'.
  * Memory addresses should be aligned to KASAN_SHADOW_SCALE_SIZE.
  */
-static void kasan_poison_shadow(const void *address, size_t size, u8 value)
+void kasan_poison_shadow(const void *address, size_t size, u8 value)
 {
     void *shadow_start, *shadow_end;
 
@@ -198,11 +201,14 @@ static __always_inline bool memory_is_poisoned_n(unsigned long addr,
     if (unlikely(ret)) {
         unsigned long last_byte = addr + size - 1;
         s8 *last_shadow = (s8 *)kasan_mem_to_shadow((void *)last_byte);
+        s8 last_accessible_byte = last_byte & KASAN_SHADOW_MASK;
 
         if (unlikely(ret != (unsigned long)last_shadow ||
-            ((last_byte & KASAN_SHADOW_MASK) >= *last_shadow)))
+            (last_accessible_byte >= *last_shadow))) {
             return true;
+        }
     }
+
     return false;
 }
 

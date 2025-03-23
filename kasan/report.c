@@ -13,14 +13,20 @@
  *
  */
 
+// #include <linux/kernel.h>
+// #include <linux/mm.h>
+// #include <linux/printk.h>
+// #include <linux/sched.h>
+// #include <linux/slab.h>
+// #include <linux/stacktrace.h>
+// #include <linux/string.h>
+// #include <linux/types.h>
+#include "../helper.h"
+#include "../spinlock.h"
+#include <linux/compiler.h>
+#include <linux/bits.h>
 #include <linux/kernel.h>
-#include <linux/mm.h>
 #include <linux/printk.h>
-#include <linux/sched.h>
-#include <linux/slab.h>
-#include <linux/stacktrace.h>
-#include <linux/string.h>
-#include <linux/types.h>
 #include <linux/kasan.h>
 
 #include "kasan.h"
@@ -64,7 +70,7 @@ static void print_error_description(struct kasan_access_info *info)
         info->access_addr);
     pr_err("%s of size %zu by task %s/%d\n",
         info->is_write ? "Write" : "Read",
-        info->access_size, current->comm, task_pid_nr(current));
+        info->access_size, get_current_comm(), get_current_pid());
 }
 
 static void print_address_description(struct kasan_access_info *info)
@@ -148,7 +154,7 @@ void kasan_report_user_access(struct kasan_access_info *info)
         info->access_addr);
     pr_err("%s of size %zu by task %s/%d\n",
         info->is_write ? "Write" : "Read",
-        info->access_size, current->comm, task_pid_nr(current));
+        info->access_size, get_current_comm(), get_current_pid());
     dump_stack();
     pr_err("================================="
         "=================================\n");

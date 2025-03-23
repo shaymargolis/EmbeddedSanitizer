@@ -1,6 +1,7 @@
 #ifndef __MM_KASAN_KASAN_H
 #define __MM_KASAN_KASAN_H
 
+#include "../helper.h"
 #include <linux/kasan.h>
 
 #define KASAN_SHADOW_SCALE_SIZE (1UL << KASAN_SHADOW_SCALE_SHIFT)
@@ -25,7 +26,18 @@ static inline const void *kasan_shadow_to_mem(const void *shadow_addr)
 
 static inline bool kasan_enabled(void)
 {
-    return !current->kasan_depth;
+    // return !current->kasan_depth;
+    return true;
+}
+
+static const char *get_current_comm(void)
+{
+    return "test";
+}
+
+static int get_current_pid(void)
+{
+    return 0;
 }
 
 void kasan_report(unsigned long addr, size_t size,

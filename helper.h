@@ -36,12 +36,16 @@ typedef uint64_t u64; // Unsigned 64-bit
 #define dump_stack(...) do {} while(0)
 #define check_panic_on_warn(...) do {} while (0)
 #define pr_warn(...) do {} while(0)
-#define pr_err(...) printf("ERR: " __VA_ARGS__)
-#define panic(...) printf("PANIC: " __VA_ARGS__)
+#define printk(...) printf(__VA_ARGS__)
+#define pr_err(...) printk("ERR: " __VA_ARGS__)
+#define panic(...) printk("PANIC: " __VA_ARGS__)
 #define kunit_fail_current_test(...) do {} while(0)
 #define EXPORT_SYMBOL(...) 
 #define WARN_ON(...) do {} while (0)
+#define BUILD_BUG(...) do {} while (0)
 
 #define BIT(x) _BITUL(x)
+
+#define KERN_ERR "ERR: "
 
 #endif // EMBEDDED_SANITIZER_HELPER_H
