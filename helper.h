@@ -27,6 +27,10 @@ typedef uint64_t u64; // Unsigned 64-bit
 #define CONFIG_UBSAN_SIGNED_WRAP
 #define CONFIG_UBSAN_UNREACHABLE
 
+#define CONFIG_KASAN
+#define CONFIG_KASAN_SHADOW_OFFSET 0x90000000
+#define KASAN_SHADOW_START 0x90000000
+
 #define user_access_save() (0)
 #define user_access_restore(...) do {} while(0)
 #define dump_stack(...) do {} while(0)
