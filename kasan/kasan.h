@@ -20,7 +20,7 @@ void kasan_report_user_access(struct kasan_access_info *info);
 
 static inline const void *kasan_shadow_to_mem(const void *shadow_addr)
 {
-    return (void *)(((unsigned long)shadow_addr - KASAN_SHADOW_OFFSET)
+    return (void *)(((unsigned long)shadow_addr - (unsigned long)g_kasan_shadow_offset)
         << KASAN_SHADOW_SCALE_SHIFT);
 }
 
@@ -39,6 +39,8 @@ static int get_current_pid(void)
 {
     return 0;
 }
+
+void kasan_init(void);
 
 void kasan_report(unsigned long addr, size_t size,
         bool is_write, unsigned long ip);
